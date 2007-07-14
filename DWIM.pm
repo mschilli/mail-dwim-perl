@@ -4,18 +4,50 @@ package Mail::DWIM;
 
 use strict;
 use warnings;
-use MIME::Lite;
- 
+our @ISA = qw(Exporter);
+our @EXPORT_OK = qw(mail);
 our $VERSION = "0.01";
+
+use YAML qw(LoadFile);
+use Log::Log4perl qw(:easy);
+
+###########################################
+sub mail {
+###########################################
+    my(@params) = @_;
+
+    my $mailer = Mail::DWIM->new(@params);
+}
 
 ###########################################
 sub new {
 ###########################################
     my($class, %options) = @_;
 
+    my($homedir) = glob "~";
+
+    my %defaults;
+
     my $self = {
+        global_cfg_file => "/etc/maildwim",
+        user_cfg_file   => "$homedir/.maildwim",
+        transport       => "sendmail",
         %options,
     };
+
+    for my $cfg (qw(global_cfg_file user_cfg_file)) {
+        if(-f $self->{$cfg}) {
+            my $yml = LoadFile( $self->{$cfg} );
+            if(defined $yml and ref $yml ne 'HASH') {
+                  # Needs to be a hash, but YAML file can be empty (undef)
+                LOGDIE "YAML file $self->{$cfg} format not a hash";
+            }
+              # merge with existing hash
+            %defaults = (%defaults, %$yml) if defined $yml;
+        }
+    }
+
+    %$self = (%$self, %defaults);
 
     bless $self, $class;
 }
@@ -24,23 +56,22 @@ sub new {
 sub html_compat {
 ###########################################
     my($text) = @_;
+
+    eval "require MIME::Lite";
  
-    my $msg = MIME::Lite->new(
-        From     => 'sender@host.com',
-        To       => 'recipient@host.com',
-        Subject  => "Both Plain and in HTML",
-        Type     =>'multipart/alternative',
-    );
- 
-    $msg->attach(Type => 'text/plain',
-                 Data => $plaintext
-            );
- 
-    $msg->attach(Type => 'text/html',
-                 Data => $htmltext,
-            );
- 
-    $msg->send();
+my $msg = MIME::Lite->new(
+From=> 'sender@host.com',
+To=> 'recipient@host.com',
+Subject=> "Both Plain and in HTML",
+Type=>'multipart/alternative',
+);
+#$msg->attach(Type => 'text/plain',
+#Data => $plaintext
+#);
+#$msg->attach(Type => 'text/html',
+#Data => $htmltext,
+#);
+#$msg->send();
 }
 
 1;
@@ -195,6 +226,16 @@ This will create two attachments, the first one as plain text
 the specified HTML message marked as content-type C<text/html>. 
 Non-HTML mail readers will pick up the first one, and Outlook-using
 marketroids get fancy HTML. Everytext wins.
+
+=head2 Test Mode
+
+If the environment variable C<MAIL_DWIM_TEST> is set to a filename,
+C<Mail::DWIM> prepares mail as usual, but doesn't send it off 
+using the specified transport mechanism. Instead, it appends outgoing
+mail ot the specified file. 
+
+C<Mail::DWIM>'s test suite uses this mode to run a regression test
+without needing an MTA.
 
 =head2 Why another Mail Module?
 
