@@ -63,8 +63,9 @@ Mail::DWIM - Do-What-I-Mean Mailer
 
 =head1 DESCRIPTION
 
-C<Mail::DWIM> makes it easy to send out mail messages. You just name the
-recipient, the subject line and the mail text and Mail::DWIM does the rest.
+C<Mail::DWIM> makes it easy to send email. You just name the
+recipient, the subject line and the mail text and Mail::DWIM
+does the rest.
 
 C<Mail::DWIM> lets you store commonly used settings (like the default
 sender email address or the transport mechanism) in a local
@@ -111,13 +112,15 @@ Or the unix mail command:
       to          => 'foo@bar.com'
       subject     => 'test message',
       text        => 'test message text',
-      transport   => 'mail_cmd',
+      transport   => 'unixmail',
       mail_cmd    => '/usr/bin/mail',
     );
 
 On a given system, these settings need to be specified only once and
 put into a configuration file. All C<Mail::DWIM> instances running on 
 this system will pick them up as default settings.
+
+=head2 Configuration files
 
 There is a global C<Mail::DWIM> configuration file in C</etc/maildwim>
 with global settings and a user-specific file in C<~user/.maildwim>
@@ -131,6 +134,9 @@ their format is YAML:
 
 =head2 Sending Attachments
 
+To attach an image or a PDF document to the email, set the C<attach>
+parameter to the filename:
+
     mail(
       to      => 'foo@bar.com'
       subject => 'test message',
@@ -138,19 +144,20 @@ their format is YAML:
       attach  => 'somepic.jpg',
     );
 
-You can even name those attachements or include several of them:
+You can even name those attachements and/or include several of them:
 
     mail(
       to      => 'foo@bar.com'
       subject => 'test message',
       text    => 'test message text'
-      attach  => [ { text => 'Me at Copacabana' 
-                     file => 'copa.jpg', 
-                   },
-                   { text => 'Me at Eiffel Tower'
-                     file => 'eiffel.jpg', 
-                   },
-                 ],
+      attach  => [ 
+        { text => 'Me at Copacabana' 
+          file => 'copa.jpg', 
+        },
+        { text => 'Me at Eiffel Tower'
+          file => 'eiffel.jpg', 
+        },
+      ],
     );
 
 =head2 Error Handling
