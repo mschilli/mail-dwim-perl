@@ -125,7 +125,8 @@ C<Mail::DWIM> uses defaults wherever possible. So if you say
 that's enough for the mailer to send out an email to the specified
 address. There's no C<from> field, so C<Mail::DWIM> uses 'user@domain.com'
 where C<user> is the current Unix user and C<domain.com> is the domain
-set in TODO. If you want to specify a different 'From:' field, go ahead:
+set in the Perl configuration (C<Config.pm>).
+If you want to specify a different 'From:' field, go ahead:
 
     mail(
       from    => 'me@mydomain.com',
