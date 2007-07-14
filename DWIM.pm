@@ -10,6 +10,8 @@ our $VERSION = "0.01";
 
 use YAML qw(LoadFile);
 use Log::Log4perl qw(:easy);
+use Config;
+use Sys::Hostname;
 
 ###########################################
 sub mail {
@@ -34,6 +36,12 @@ sub new {
         transport       => "sendmail",
         %options,
     };
+
+      # Guess the 'from' address
+    my $user   = scalar getpwuid($<);
+    my $domain = $Config{mydomain};
+    $domain =~ s/^\.//;
+    $self->{from} = "$user\@$domain";
 
     for my $cfg (qw(global_cfg_file user_cfg_file)) {
         if(-f $self->{$cfg}) {
