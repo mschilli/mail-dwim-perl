@@ -63,7 +63,7 @@ sub new {
         }
     }
 
-    %$self = (%$self, %defaults);
+    %$self = (%$self, %defaults, %options);
 
     bless $self, $class;
 }
