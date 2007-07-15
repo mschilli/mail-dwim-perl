@@ -14,8 +14,9 @@ use Log::Log4perl qw(:easy);
 
 #Log::Log4perl->easy_init($DEBUG);
 
-plan tests => 2;
+plan tests => 7;
 
+  # no raise_error
 my $rc = mail(
   from    => 'foo@foo.com',
   to      => 'bar@bar.com',
@@ -27,3 +28,35 @@ my $rc = mail(
 
 ok(!$rc, "SMTP server missing");
 like(Mail::DWIM::error(), qr/No smtp_server set/, "Error set in error()");
+
+my($fh, $file) = tempfile( UNLINK=>1 );
+
+$ENV{MAIL_DWIM_TEST} = $file;
+  # 
+mail(
+  from    => 'foo@foo.com',
+  to      => 'bar@bar.com',
+  subject => 'subject test 1',
+  text    => 'text test 2',
+);
+
+my $data = Mail::DWIM::slurp($file);
+
+like($data, qr/\n\ntext test 2/, "regular mail");
+like($data, qr/^To: bar\@bar.com/m, "regular mail");
+Mail::DWIM::blurt("", $file);
+
+  # html test
+mail(
+  from    => 'foo@foo.com',
+  to      => 'bar@bar.com',
+  subject => 'subject test 1',
+  text    => 'text <i>test</i> 2',
+  html_compat => 1
+);
+
+$data = Mail::DWIM::slurp($file);
+
+like($data, qr/^Subject: subject test 1/m, "html mail");
+like($data, qr/^Content-Type: multipart\/alternative/m, "html mail");
+like($data, qr/multi-part/m, "html mail");

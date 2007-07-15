@@ -38,6 +38,7 @@ sub new {
         global_cfg_file => "/etc/maildwim",
         user_cfg_file   => "$homedir/.maildwim",
         transport       => "sendmail",
+        raise_error     => 1,
         %options,
     };
 
@@ -99,15 +100,29 @@ sub send {
         $headers{ucfirst($_)} = $self->{$_} if exists $self->{$_};
     }
 
+    my $text = $self->{text};
+    if($self->{html_compat}) {
+        my $h;
+        ($h, $text) = html_msg($text);
+        %headers = (%headers, %$h);
+    }
+
     if($ENV{MAIL_DWIM_TEST}) {
         DEBUG "Appending to test file $ENV{MAIL_DWIM_TEST}";
-        test_file_append($msg);
+        my $txt;
+        for (keys %headers) {
+            $txt .= "$_: $headers{$_}\n";
+        }
+        $txt .= "\n";
+
+        test_file_append($txt . $text);
+        return 1;
     } else {
         DEBUG $msg;
     }
 
     $mailer->open(\%headers);
-    print $mailer $self->{text};
+    print $mailer $text;
     $mailer->close();
 }
 
@@ -150,25 +165,56 @@ sub test_file_append {
 }
 
 ###########################################
-sub html_compat {
+sub html_msg {
 ###########################################
-    my($text) = @_;
+    my($htmltext) = @_;
 
-    eval "require MIME::Lite";
- 
-my $msg = MIME::Lite->new(
-From=> 'sender@host.com',
-To=> 'recipient@host.com',
-Subject=> "Both Plain and in HTML",
-Type=>'multipart/alternative',
-);
-#$msg->attach(Type => 'text/plain',
-#Data => $plaintext
-#);
-#$msg->attach(Type => 'text/html',
-#Data => $htmltext,
-#);
-#$msg->send();
+    for (qw(HTML::FormatText HTML::TreeBuilder MIME::Lite)) {
+        eval "require $_";
+        if($@) {
+            LOGDIE "Please install $_ from CPAN";
+        }
+    }
+
+    my $tree = HTML::TreeBuilder->new();
+    $tree->parse($htmltext);
+    $tree->eof();
+    my $formatter = HTML::FormatText->new();
+    my $plaintext = $formatter->format($tree);
+
+    my $msg = MIME::Lite->new(
+      Type    => 'multipart/alternative',
+    );
+
+    $msg->attach(
+      Type => 'text/plain',
+      Data => $plaintext
+    );
+
+    $msg->attach(
+        Type => 'text/html',
+        Data => $htmltext,
+    );
+
+    my %headers;
+
+    for (qw(Content-Transfer-Encoding Content-Type 
+            MIME-version)) {
+        $headers{$_} = $msg->attr($_);
+    }
+
+    return \%headers, $msg->body_as_string;
+}
+
+###########################################
+sub header_ucfirst {
+###########################################
+    my($name) = @_;
+
+    $name =~ s/^(\w)/uc($1)/g;
+    $name =~ s/-(\w)/uc($1)/g;
+
+    return $name;
 }
 
 ###########################################
@@ -208,6 +254,29 @@ sub printable {
     return $data;
 }
 
+###########################################
+sub blurt {
+###########################################
+    my($data, $file) = @_;
+
+    open FILE, ">$file" or die "Cannot open $file";
+    print FILE $data;
+    close FILE;
+}
+
+###########################################
+sub slurp {
+###########################################
+    my($file) = @_;
+
+    local($/);
+    $/ = undef;
+
+    open FILE, "<$file" or die "Cannot open $file";
+    my $data = <FILE>;
+    close FILE;
+    return $data;
+}
 1;
 
 __END__

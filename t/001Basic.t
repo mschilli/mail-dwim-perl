@@ -20,8 +20,8 @@ my($fhg, $gcfg) = tempfile();
 my($fhu, $ucfg) = tempfile();
 
   # Local overrides global
-blurt("from: goof\@goof.com\n", $gcfg);
-blurt("from: goof2\@goof.com\n", $ucfg);
+Mail::DWIM::blurt("from: goof\@goof.com\n", $gcfg);
+Mail::DWIM::blurt("from: goof2\@goof.com\n", $ucfg);
 my $m = Mail::DWIM->new(
   global_cfg_file => $gcfg,
   user_cfg_file   => $ucfg,
@@ -29,7 +29,7 @@ my $m = Mail::DWIM->new(
 is($m->{from}, 'goof2@goof.com', "user cfg overrides global");
 
   # No local, just global
-blurt("", $ucfg);
+Mail::DWIM::blurt("", $ucfg);
 $m = Mail::DWIM->new(
   global_cfg_file => $gcfg,
   user_cfg_file   => $ucfg,
@@ -37,8 +37,8 @@ $m = Mail::DWIM->new(
 is($m->{from}, 'goof@goof.com', "global cfg");
 
   # Empty conf files
-blurt("", $ucfg);
-blurt("", $gcfg);
+Mail::DWIM::blurt("", $ucfg);
+Mail::DWIM::blurt("", $gcfg);
 $m = Mail::DWIM->new(
   global_cfg_file => $gcfg,
   user_cfg_file   => $ucfg,
@@ -60,27 +60,3 @@ mail(
   subject => 'This is the subject line',
   text    => 'This is the mail text',
 );
-
-###########################################
-sub blurt {
-###########################################
-    my($data, $file) = @_;
-
-    open FILE, ">$file" or die "Cannot open $file";
-    print FILE $data;
-    close FILE;
-}
-
-###########################################
-sub slurp {
-###########################################
-    my($file) = @_;
-
-    local($/);
-    $/ = undef;
-
-    open FILE, "<$file" or die "Cannot open $file";
-    my $data = <FILE>;
-    close FILE;
-    return $data;
-}
