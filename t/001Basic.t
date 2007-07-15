@@ -7,9 +7,12 @@ use warnings;
 use strict;
 
 use Test::More;
-use Mail::DWIM;
+use Mail::DWIM qw(mail);
 use Data::Dumper;
 use File::Temp qw(tempfile);
+use Log::Log4perl qw(:easy);
+
+Log::Log4perl->easy_init($DEBUG);
 
 plan tests => 4;
 
@@ -50,6 +53,13 @@ $m = Mail::DWIM->new(
   user_cfg_file   => $ucfg,
 );
 like($m->{from}, qr/\S\@\S/, "from: determined by user/domain");
+
+mail(
+  from    => 'a@b.com',
+  to      => 'c@d.com',
+  subject => 'This is the subject line',
+  text    => 'This is the mail text',
+);
 
 ###########################################
 sub blurt {

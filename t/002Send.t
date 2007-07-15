@@ -26,5 +26,4 @@ my $rc = mail(
 );
 
 ok(!$rc, "SMTP server missing");
-
 like(Mail::DWIM::error(), qr/No smtp_server set/, "Error set in error()");

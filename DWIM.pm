@@ -14,6 +14,8 @@ use Config;
 use Mail::Mailer;
 use Sys::Hostname;
 
+my $error;
+
 ###########################################
 sub mail {
 ###########################################
@@ -40,10 +42,12 @@ sub new {
     };
 
       # Guess the 'from' address
-    my $user   = scalar getpwuid($<);
-    my $domain = $Config{mydomain};
-    $domain =~ s/^\.//;
-    $self->{from} = "$user\@$domain";
+    if(! exists $self->{from}) {
+        my $user   = scalar getpwuid($<);
+        my $domain = $Config{mydomain};
+        $domain =~ s/^\.//;
+        $self->{from} = "$user\@$domain";
+    }
 
     for my $cfg (qw(global_cfg_file user_cfg_file)) {
         if(-f $self->{$cfg}) {
@@ -65,20 +69,17 @@ sub new {
 ###########################################
 sub send {
 ###########################################
-    my($self) = @_;
+    my($self, $evaled) = @_;
+
+    if(!$self->{raise_error} && ! $evaled) {
+        return $self->send_evaled();
+    }
 
     my $msg =
           "Sending from=$self->{from} to=$self->{to} " .
-          "subj=", snip($self->{subject}, 20), " " .
-          "text=", snip($self->{text}, 20) .
+          "subj=" . snip($self->{subject}, 20) . " " .
+          "text=" . snip($self->{text}, 20) .
           "";
-
-    if($ENV{MAIL_DWIM_TEST}) {
-        DEBUG "Appending to test file $ENV{MAIL_DWIM_TEST}";
-        test_file_append($msg);
-    } else {
-        DEBUG $msg;
-    }
 
     my @options = ();
 
@@ -93,14 +94,48 @@ sub send {
     }
 
     my $mailer = Mail::Mailer->new(@options);
-    my @headers;
+    my %headers;
     for (qw(from to cc bcc subject)) {
-        push @headers, Lc($_) => $self->{$_} if exists $self->{$_};
+        $headers{ucfirst($_)} = $self->{$_} if exists $self->{$_};
     }
 
-    $mailer->open(\@headers);
+    if($ENV{MAIL_DWIM_TEST}) {
+        DEBUG "Appending to test file $ENV{MAIL_DWIM_TEST}";
+        test_file_append($msg);
+    } else {
+        DEBUG $msg;
+    }
+
+    $mailer->open(\%headers);
     print $mailer $self->{text};
     $mailer->close();
+}
+
+###########################################
+sub send_evaled {
+###########################################
+    my($self) = @_;
+
+    eval {
+        return $self->send(1);
+    };
+
+    if($@) {
+        error($@);
+        return undef;
+    }
+}
+
+###########################################
+sub error {
+###########################################
+    my($text) = @_;
+
+    if(defined $text) {
+        $error = $text;
+    }
+
+    return $error;
 }
 
 ###########################################
@@ -308,8 +343,10 @@ a false value:
     );
 
     if(! $rc) {
-        die "A dreadful mailer error! Release the hounds!";
+        die "Release the hounds: ", Mail::DWIM::error();
     }
+
+The detailed error message is available by calling Mail::DWIM::error().
 
 =head2 Sending HTML Emails
 
