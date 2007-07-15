@@ -357,16 +357,6 @@ deliver the mail. But you can also specify an SMTP server:
       smtp_server => 'smtp.foobar.com',
     );
 
-Or the unix mail command:
-
-    mail(
-      to          => 'foo@bar.com'
-      subject     => 'test message',
-      text        => 'test message text',
-      transport   => 'unixmail',
-      mail_cmd    => '/usr/bin/mail',
-    );
-
 On a given system, these settings need to be specified only once and
 put into a configuration file. All C<Mail::DWIM> instances running on 
 this system will pick them up as default settings.
@@ -382,34 +372,6 @@ their format is YAML:
     from:      me@mydomain.com
     reply-to:  me@mydomain.com
     transport: sendmail
-
-=head2 Sending Attachments
-
-To attach an image or a PDF document to the email, set the C<attach>
-parameter to the filename:
-
-    mail(
-      to      => 'foo@bar.com'
-      subject => 'test message',
-      text    => 'test message text'
-      attach  => 'somepic.jpg',
-    );
-
-You can even name those attachements and/or include several of them:
-
-    mail(
-      to      => 'foo@bar.com'
-      subject => 'test message',
-      text    => 'test message text'
-      attach  => [ 
-        { text => 'Me at Copacabana' 
-          file => 'copa.jpg', 
-        },
-        { text => 'Me at Eiffel Tower'
-          file => 'eiffel.jpg', 
-        },
-      ],
-    );
 
 =head2 Error Handling
 
@@ -433,7 +395,7 @@ The detailed error message is available by calling Mail::DWIM::error().
 =head2 Sending HTML Emails
 
 Many people hate HTML emails, but if you also attach a plaintext version 
-for people with arcane email readers, everytext is happy. C<Mail::DWIM>
+for people with arcane email readers, everybody is happy. C<Mail::DWIM>
 makes this easy with the C<html_compat> option:
 
     mail(
@@ -465,12 +427,10 @@ The problem with other Mail:: or Email:: modules on CPAN is that they
 expose more options than the casual user needs. Why create a
 mailer object, call its accessors and then its C<send> method if all I
 want to do is call a function that works similarily to the Unix
-C<mail> program? C<Mail::DWIM> makes easy things easy while making
-sure that hard things are still possible (I think I've heard this
-motto before :).
+C<mail> program?
 
 C<Mail::DWIM> tries to be as 'Do-What-I-mean' as the venerable Unix
-mail command. Noboby has to read its documentation to use it:
+C<mail> command. Noboby has to read its documentation to use it:
 
     $ mail m@perlmeister.com
     Subject: foobar
