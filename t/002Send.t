@@ -8,7 +8,6 @@ use strict;
 
 use Test::More;
 use Mail::DWIM qw(mail);
-use Data::Dumper;
 use File::Temp qw(tempfile);
 use Log::Log4perl qw(:easy);
 
@@ -46,17 +45,24 @@ like($data, qr/\n\ntext test 2/, "regular mail");
 like($data, qr/^To: bar\@bar.com/m, "regular mail");
 Mail::DWIM::blurt("", $file);
 
-  # html test
-mail(
-  from    => 'foo@foo.com',
-  to      => 'bar@bar.com',
-  subject => 'subject test 1',
-  text    => 'text <i>test</i> 2',
-  html_compat => 1
-);
+SKIP: {
 
-$data = Mail::DWIM::slurp($file);
+    if(! Mail::DWIM::html_requirements()) {
+        skip "@Mail::DWIM::HTML_MODULES not installed", 3;
+    }
 
-like($data, qr/^Subject: subject test 1/m, "html mail");
-like($data, qr/^Content-Type: multipart\/alternative/m, "html mail");
-like($data, qr/multi-part/m, "html mail");
+      # html test
+    mail(
+      from    => 'foo@foo.com',
+      to      => 'bar@bar.com',
+      subject => 'subject test 1',
+      text    => 'text <i>test</i> 2',
+      html_compat => 1
+    );
+    
+    $data = Mail::DWIM::slurp($file);
+    
+    like($data, qr/^Subject: subject test 1/m, "html mail");
+    like($data, qr/^Content-Type: multipart\/alternative/m, "html mail");
+    like($data, qr/multi-part/m, "html mail");
+};

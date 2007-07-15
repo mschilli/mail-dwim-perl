@@ -7,6 +7,7 @@ use warnings;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mail);
 our $VERSION = "0.01";
+our @HTML_MODULES = qw(HTML::FormatText HTML::TreeBuilder MIME::Lite);
 
 use YAML qw(LoadFile);
 use Log::Log4perl qw(:easy);
@@ -165,15 +166,27 @@ sub test_file_append {
 }
 
 ###########################################
+sub html_requirements {
+###########################################
+
+    for (@HTML_MODULES) {
+        eval "require $_";
+        if($@) {
+            return undef;
+        }
+    }
+
+    1;
+}
+
+###########################################
 sub html_msg {
 ###########################################
     my($htmltext) = @_;
 
-    for (qw(HTML::FormatText HTML::TreeBuilder MIME::Lite)) {
-        eval "require $_";
-        if($@) {
-            LOGDIE "Please install $_ from CPAN";
-        }
+    if(! html_requirements()) {
+        LOGDIE "Please install ",
+               join(" ", @HTML_MODULES), " from CPAN";
     }
 
     my $tree = HTML::TreeBuilder->new();

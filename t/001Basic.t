@@ -8,7 +8,6 @@ use strict;
 
 use Test::More;
 use Mail::DWIM qw(mail);
-use Data::Dumper;
 use File::Temp qw(tempfile);
 use Log::Log4perl qw(:easy);
 
