@@ -11,6 +11,7 @@ our $VERSION = "0.01";
 use YAML qw(LoadFile);
 use Log::Log4perl qw(:easy);
 use Config;
+use Mail::Mailer;
 use Sys::Hostname;
 
 ###########################################
@@ -19,6 +20,7 @@ sub mail {
     my(@params) = @_;
 
     my $mailer = Mail::DWIM->new(@params);
+    $mailer->send();
 }
 
 ###########################################
@@ -61,6 +63,58 @@ sub new {
 }
 
 ###########################################
+sub send {
+###########################################
+    my($self) = @_;
+
+    my $msg =
+          "Sending from=$self->{from} to=$self->{to} " .
+          "subj=", snip($self->{subject}, 20), " " .
+          "text=", snip($self->{text}, 20) .
+          "";
+
+    if($ENV{MAIL_DWIM_TEST}) {
+        DEBUG "Appending to test file $ENV{MAIL_DWIM_TEST}";
+        test_file_append($msg);
+    } else {
+        DEBUG $msg;
+    }
+
+    my @options = ();
+
+    if(0) {
+    } elsif($self->{transport} eq "sendmail") {
+        @options = ();
+    } elsif($self->{transport} eq "smtp") {
+        LOGDIE "No smtp_server set" unless defined $self->{smtp_server};
+        @options = ("smtp", Server => $self->{smtp_server});
+    } else {
+        LOGDIE "Unknown transport '$self->{transport}'";
+    }
+
+    my $mailer = Mail::Mailer->new(@options);
+    my @headers;
+    for (qw(from to cc bcc subject)) {
+        push @headers, Lc($_) => $self->{$_} if exists $self->{$_};
+    }
+
+    $mailer->open(\@headers);
+    print $mailer $self->{text};
+    $mailer->close();
+}
+
+###########################################
+sub test_file_append {
+###########################################
+    my($msg) = @_;
+
+    open FILE, ">>$ENV{MAIL_DWIM_TEST}" or
+        LOGDIE "Cannot open $ENV{MAIL_DWIM_TEST} ($!)";
+    print FILE $msg, "\n\n";
+    close FILE;
+}
+
+###########################################
 sub html_compat {
 ###########################################
     my($text) = @_;
@@ -80,6 +134,43 @@ Type=>'multipart/alternative',
 #Data => $htmltext,
 #);
 #$msg->send();
+}
+
+###########################################
+sub snip {
+###########################################
+    my($data, $maxlen) = @_;
+
+    if(length $data <= $maxlen) {
+        return lenformat($data);
+    }
+
+    $maxlen = 12 if $maxlen < 12;
+    my $sniplen = int(($maxlen - 8) / 2);
+
+    my $start   = substr($data,  0, $sniplen);
+    my $end     = substr($data, -$sniplen);
+    my $snipped = length($data) - 2*$sniplen;
+
+    return lenformat("$start\[...]$end", length $data);
+}
+
+###########################################
+sub lenformat {
+###########################################
+    my($data, $orglen) = @_;
+
+    return "(" . ($orglen || length($data)) . ")[" .
+        printable($data) . "]";
+}
+
+###########################################
+sub printable {
+###########################################
+    my($data) = @_;
+
+    $data =~ s/[^ \w.;!?@#$%^&*()+\\|~`'-,><[\]{}="]/./g;
+    return $data;
 }
 
 1;
@@ -105,6 +196,9 @@ Mail::DWIM - Do-What-I-Mean Mailer
 C<Mail::DWIM> makes it easy to send email. You just name the
 recipient, the subject line and the mail text and Mail::DWIM
 does the rest.
+
+This module isn't for processing massive amounts of email. It is
+for sending casual emails without worrying about technical details.
 
 C<Mail::DWIM> lets you store commonly used settings (like the default
 sender email address or the transport mechanism) in a local
