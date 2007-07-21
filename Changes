@@ -1,5 +1,8 @@
 ######################################################################
 Revision history for Perl extension Mail::DWIM
 
+0.02  2007/07/21
+    (ms) Added 'attach'
+
 0.01  2007/07/13
-      * Where it all began.
+    (ms) Where it all began.

@@ -8,12 +8,14 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mail);
 our $VERSION = "0.01";
 our @HTML_MODULES = qw(HTML::FormatText HTML::TreeBuilder MIME::Lite);
+our @ATTACH_MODULES = qw(File::MMagic MIME::Lite);
 
 use YAML qw(LoadFile);
 use Log::Log4perl qw(:easy);
 use Config;
 use Mail::Mailer;
 use Sys::Hostname;
+use File::Basename;
 
 my $error;
 
@@ -108,6 +110,12 @@ sub send {
         %headers = (%headers, %$h);
     }
 
+    if($self->{attach}) {
+        my $h;
+        ($h, $text) = attach_msg($text, @{$self->{attach}});
+        %headers = (%headers, %$h);
+    }
+
     if($ENV{MAIL_DWIM_TEST}) {
         DEBUG "Appending to test file $ENV{MAIL_DWIM_TEST}";
         my $txt;
@@ -180,6 +188,20 @@ sub html_requirements {
 }
 
 ###########################################
+sub attach_requirements {
+###########################################
+
+    for (@ATTACH_MODULES) {
+        eval "require $_";
+        if($@) {
+            return undef;
+        }
+    }
+
+    1;
+}
+
+###########################################
 sub html_msg {
 ###########################################
     my($htmltext) = @_;
@@ -208,6 +230,46 @@ sub html_msg {
         Type => 'text/html',
         Data => $htmltext,
     );
+
+    my %headers;
+
+    for (qw(Content-Transfer-Encoding Content-Type 
+            MIME-version)) {
+        $headers{$_} = $msg->attr($_);
+    }
+
+    return \%headers, $msg->body_as_string;
+}
+
+###########################################
+sub attach_msg {
+###########################################
+    my($text, @files) = @_;
+
+    if(! attach_requirements()) {
+        LOGDIE "Please install ",
+               join(" ", @ATTACH_MODULES), " from CPAN";
+    }
+
+    my $msg = MIME::Lite->new(
+      Type => 'multipart/mixed',
+    );
+
+    $msg->attach(Type     => "TEXT",
+                 Data     => $text,
+                );
+
+    for my $file (@files) {
+        my $mm = File::MMagic->new();
+        my $type = $mm->checktype_filename($file);
+        LOGDIE "Cannot determine mime type of $file" unless defined $type;
+
+        $msg->attach(Type        => $type,
+                     Path        => $file,
+                     Filename    => basename($file),
+                     Disposition => "attachment",
+        );
+    }
 
     my %headers;
 
@@ -391,6 +453,18 @@ a false value:
     }
 
 The detailed error message is available by calling Mail::DWIM::error().
+
+=head2 Attaching files
+
+If you want to include an image, a PDF files or some other attachment
+in an email, use the C<attach> parameter 
+
+    mail(
+      to          => 'foo@bar.com',
+      subject     => 'Pics of my new dog',
+      attach      => ['doggie1.jpg', 'doggie2.jpg'],
+      text        => "Hey, here's two cute pictures of Fritz :)",
+    );
 
 =head2 Sending HTML Emails
 
