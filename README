@@ -1,5 +1,5 @@
 ######################################################################
-    Mail::DWIM 0.01
+    Mail::DWIM 0.02
 ######################################################################
 
 NAME
@@ -92,6 +92,17 @@ DESCRIPTION
         }
 
     The detailed error message is available by calling Mail::DWIM::error().
+
+  Attaching files
+    If you want to include an image, a PDF files or some other attachment in
+    an email, use the "attach" parameter
+
+        mail(
+          to          => 'foo@bar.com',
+          subject     => 'Pics of my new dog',
+          attach      => ['doggie1.jpg', 'doggie2.jpg'],
+          text        => "Hey, here's two cute pictures of Fritz :)",
+        );
 
   Sending HTML Emails
     Many people hate HTML emails, but if you also attach a plaintext version

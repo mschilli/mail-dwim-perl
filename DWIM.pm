@@ -6,7 +6,7 @@ use strict;
 use warnings;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mail);
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 our @HTML_MODULES = qw(HTML::FormatText HTML::TreeBuilder MIME::Lite);
 our @ATTACH_MODULES = qw(File::MMagic MIME::Lite);
 
@@ -252,7 +252,7 @@ sub attach_msg {
     }
 
     my $msg = MIME::Lite->new(
-      Type => 'multipart/mixed',
+        Type => "multipart/mixed"
     );
 
     $msg->attach(Type     => "TEXT",
@@ -271,14 +271,30 @@ sub attach_msg {
         );
     }
 
-    my %headers;
+    my $headers = mime_lite_headers($msg);
 
-    for (qw(Content-Transfer-Encoding Content-Type 
-            MIME-version)) {
-        $headers{$_} = $msg->attr($_);
+    return $headers, $msg->body_as_string;
+}
+
+###########################################
+sub mime_lite_headers {
+###########################################
+    my($mlite) = @_;
+
+    my %wanted = map { lc($_) => $_ }
+                     qw(Content-Transfer-Encoding Content-Type 
+                        MIME-version);
+    my %headers = ();
+
+    for my $field (@{$mlite->fields}) {
+        if(exists $wanted{$field->[0]}) {
+            my($name, $value) = split /:\s*/, 
+                                $mlite->fields_as_string([$field]), 2;
+            $headers{$name} = $value;
+        }
     }
 
-    return \%headers, $msg->body_as_string;
+    return(\%headers);
 }
 
 ###########################################
