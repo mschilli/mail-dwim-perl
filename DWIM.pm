@@ -381,7 +381,7 @@ Mail::DWIM - Do-What-I-Mean Mailer
     use Mail::DWIM qw(mail);
 
     mail(
-      to      => 'foo@bar.com'
+      to      => 'foo@bar.com',
       subject => 'test message',
       text    => 'test message text'
     );
@@ -406,7 +406,7 @@ C<Mail::DWIM> uses defaults wherever possible. So if you say
     use Mail::DWIM qw(mail);
 
     mail(
-      to      => 'foo@bar.com'
+      to      => 'foo@bar.com',
       subject => 'test message',
       text    => 'test message text',
     );
@@ -419,7 +419,7 @@ If you want to specify a different 'From:' field, go ahead:
 
     mail(
       from    => 'me@mydomain.com',
-      to      => 'foo@bar.com'
+      to      => 'foo@bar.com',
       subject => 'test message',
       text    => 'test message text',
     );
@@ -428,7 +428,7 @@ By default, C<Mail::DWIM> connects to a running sendmail daemon to
 deliver the mail. But you can also specify an SMTP server:
 
     mail(
-      to          => 'foo@bar.com'
+      to          => 'foo@bar.com',
       subject     => 'test message',
       text        => 'test message text',
       transport   => 'smtp',
@@ -460,7 +460,7 @@ a false value:
 
     my $rc = mail(
       raise_error => 0,
-      to          => 'foo@bar.com'
+      to          => 'foo@bar.com',
       ...
     );
 
@@ -489,7 +489,7 @@ for people with arcane email readers, everybody is happy. C<Mail::DWIM>
 makes this easy with the C<html_compat> option:
 
     mail(
-      to          => 'foo@bar.com'
+      to          => 'foo@bar.com',
       subject     => 'test message',
       html_compat => 1,
       text        => 'This is an <b>HTML</b> email.'
