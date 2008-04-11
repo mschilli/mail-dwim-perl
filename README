@@ -1,5 +1,5 @@
 ######################################################################
-    Mail::DWIM 0.02
+    Mail::DWIM 0.03
 ######################################################################
 
 NAME
@@ -9,7 +9,7 @@ SYNOPSIS
         use Mail::DWIM qw(mail);
 
         mail(
-          to      => 'foo@bar.com'
+          to      => 'foo@bar.com',
           subject => 'test message',
           text    => 'test message text'
         );
@@ -32,7 +32,7 @@ DESCRIPTION
         use Mail::DWIM qw(mail);
 
         mail(
-          to      => 'foo@bar.com'
+          to      => 'foo@bar.com',
           subject => 'test message',
           text    => 'test message text',
         );
@@ -45,7 +45,7 @@ DESCRIPTION
 
         mail(
           from    => 'me@mydomain.com',
-          to      => 'foo@bar.com'
+          to      => 'foo@bar.com',
           subject => 'test message',
           text    => 'test message text',
         );
@@ -54,7 +54,7 @@ DESCRIPTION
     deliver the mail. But you can also specify an SMTP server:
 
         mail(
-          to          => 'foo@bar.com'
+          to          => 'foo@bar.com',
           subject     => 'test message',
           text        => 'test message text',
           transport   => 'smtp',
@@ -83,7 +83,7 @@ DESCRIPTION
 
         my $rc = mail(
           raise_error => 0,
-          to          => 'foo@bar.com'
+          to          => 'foo@bar.com',
           ...
         );
 
@@ -110,7 +110,7 @@ DESCRIPTION
     makes this easy with the "html_compat" option:
 
         mail(
-          to          => 'foo@bar.com'
+          to          => 'foo@bar.com',
           subject     => 'test message',
           html_compat => 1,
           text        => 'This is an <b>HTML</b> email.'

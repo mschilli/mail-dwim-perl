@@ -1,6 +1,10 @@
 ######################################################################
 Revision history for Perl extension Mail::DWIM
 
+0.03  (not yet released)
+    (ms) Added 'mail' transport using the 'mail' command line utility.
+         (cc: missing and path hardcoded).
+
 0.02  2007/07/21
     (ms) Added 'attach'
 

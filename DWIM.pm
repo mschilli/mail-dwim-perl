@@ -6,9 +6,10 @@ use strict;
 use warnings;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mail);
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 our @HTML_MODULES = qw(HTML::FormatText HTML::TreeBuilder MIME::Lite);
 our @ATTACH_MODULES = qw(File::MMagic MIME::Lite);
+our $CMD_LINE_MAILER = "/usr/bin/mail";
 
 use YAML qw(LoadFile);
 use Log::Log4perl qw(:easy);
@@ -71,6 +72,24 @@ sub new {
 }
 
 ###########################################
+sub cmd_line_mail {
+###########################################
+    my($self) = @_;
+
+    $self->{subject} = 'no subject' unless defined $self->{subject};
+
+    my $mailer = $CMD_LINE_MAILER;
+    $mailer = $self->{program} if defined $self->{program};
+
+    open(PIPE, "|-", $mailer,
+                    "-s", $self->{subject}, $self->{to}) or
+        LOGDIE "Opening $mailer failed: $!";
+
+    print PIPE $self->{text};
+    return close PIPE;
+}
+
+###########################################
 sub send {
 ###########################################
     my($self, $evaled) = @_;
@@ -93,6 +112,8 @@ sub send {
     } elsif($self->{transport} eq "smtp") {
         LOGDIE "No smtp_server set" unless defined $self->{smtp_server};
         @options = ("smtp", Server => $self->{smtp_server});
+    } elsif($self->{transport} eq "mail") {
+        return $self->cmd_line_mail();
     } else {
         LOGDIE "Unknown transport '$self->{transport}'";
     }
@@ -433,6 +454,17 @@ deliver the mail. But you can also specify an SMTP server:
       text        => 'test message text',
       transport   => 'smtp',
       smtp_server => 'smtp.foobar.com',
+    );
+
+Or, if you prefer that Mail::DWIM uses the C<mail> Unix command line
+utility, use 'mail' as a transport:
+
+    mail(
+      to          => 'foo@bar.com',
+      subject     => 'test message',
+      text        => 'test message text',
+      transport   => 'mail',
+      program     => '/usr/bin/mail',
     );
 
 On a given system, these settings need to be specified only once and
