@@ -1,9 +1,11 @@
 ######################################################################
 Revision history for Perl extension Mail::DWIM
 
-0.03  (not yet released)
+0.03  (2008/09/17)
     (ms) Added 'mail' transport using the 'mail' command line utility.
          (cc: missing and path hardcoded).
+    (ms) Fixed test problem reported by Volker Schering with undefined
+         $Config{mydomain}.         
 
 0.02  2007/07/21
     (ms) Added 'attach'

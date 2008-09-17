@@ -49,8 +49,7 @@ sub new {
       # Guess the 'from' address
     if(! exists $self->{from}) {
         my $user   = scalar getpwuid($<);
-        my $domain = $Config{mydomain};
-        $domain =~ s/^\.//;
+        my $domain = domain();
         $self->{from} = "$user\@$domain";
     }
 
@@ -141,7 +140,7 @@ sub send {
         DEBUG "Appending to test file $ENV{MAIL_DWIM_TEST}";
         my $txt;
         for (keys %headers) {
-            $txt .= "$_: $headers{$_}\n";
+            $txt .= "$_: $headers{$_}\n" if defined $headers{$_};
         }
         $txt .= "\n";
 
@@ -389,6 +388,29 @@ sub slurp {
     close FILE;
     return $data;
 }
+
+###########################################
+sub domain {
+###########################################
+
+    my $domain = $Config{mydomain};
+
+    if(defined $domain and length($domain)) {
+        $domain =~ s/^\.//;
+        return $domain;
+    }
+
+    eval { require Sys::Hostname; };
+    if(! $@) {
+        $domain = hostname();
+        return $domain;
+    }
+
+    $domain = "localhost";
+
+    return $domain;
+}
+
 1;
 
 __END__
