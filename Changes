@@ -1,11 +1,7 @@
 ######################################################################
 Revision history for Perl extension Mail::DWIM
 
-TODO: 
-  * Test 'from' on 'mail'.
-  * mail: cc: missing and path hardcoded.
-
-0.03  (2008/09/17)
+0.03  2008/09/17
     (ms) Added 'mail' transport using the 'mail' command line utility.
     (ms) Fixed test problem reported by Volker Schering with undefined
          $Config{mydomain}.         

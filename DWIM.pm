@@ -9,7 +9,6 @@ our @EXPORT_OK = qw(mail);
 our $VERSION = "0.03";
 our @HTML_MODULES = qw(HTML::FormatText HTML::TreeBuilder MIME::Lite);
 our @ATTACH_MODULES = qw(File::MMagic MIME::Lite);
-our $CMD_LINE_MAILER = "/usr/bin/mail";
 
 use YAML qw(LoadFile);
 use Log::Log4perl qw(:easy);
@@ -17,6 +16,7 @@ use Config;
 use Mail::Mailer;
 use Sys::Hostname;
 use File::Basename;
+use File::Spec;
 
 my $error;
 
@@ -75,19 +75,15 @@ sub cmd_line_mail {
 ###########################################
     my($self) = @_;
 
-    my @from_option = ();
-    @from_option   = (from => $self->{from}) if defined $self->{from};
-
     $self->{subject} = 'no subject' unless defined $self->{subject};
 
-    my $mailer = $CMD_LINE_MAILER;
+    my $mailer;
     $mailer = $self->{program} if defined $self->{program};
+    $mailer = bin_find("mail") unless defined $mailer;
 
     open(PIPE, "|-", $mailer,
                     "-s", $self->{subject}, $self->{to},
-                    @from_option,
-                    ) or
-        LOGDIE "Opening $mailer failed: $!";
+        ) or LOGDIE "Opening $mailer failed: $!";
 
     print PIPE $self->{text};
     return close PIPE;
@@ -414,6 +410,20 @@ sub domain {
     $domain = "localhost";
 
     return $domain;
+}
+
+######################################
+sub bin_find {
+######################################
+    my($exe) = @_;
+
+    for my $path (split /:/, $ENV{PATH}) {
+        my $full = File::Spec->catfile($path, $exe);
+
+        return $full if -x $full;
+    }
+
+    return undef;
 }
 
 1;
