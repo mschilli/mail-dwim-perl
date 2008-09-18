@@ -75,13 +75,18 @@ sub cmd_line_mail {
 ###########################################
     my($self) = @_;
 
+    my @from_option = ();
+    @from_option   = (from => $self->{from} if defined $self->{from};
+
     $self->{subject} = 'no subject' unless defined $self->{subject};
 
     my $mailer = $CMD_LINE_MAILER;
     $mailer = $self->{program} if defined $self->{program};
 
     open(PIPE, "|-", $mailer,
-                    "-s", $self->{subject}, $self->{to}) or
+                    "-s", $self->{subject}, $self->{to},
+                    @from_option,
+                    ) or
         LOGDIE "Opening $mailer failed: $!";
 
     print PIPE $self->{text};
