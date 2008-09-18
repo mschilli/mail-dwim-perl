@@ -76,7 +76,7 @@ sub cmd_line_mail {
     my($self) = @_;
 
     my @from_option = ();
-    @from_option   = (from => $self->{from} if defined $self->{from};
+    @from_option   = (from => $self->{from}) if defined $self->{from};
 
     $self->{subject} = 'no subject' unless defined $self->{subject};
 
