@@ -61,6 +61,17 @@ DESCRIPTION
           smtp_server => 'smtp.foobar.com',
         );
 
+    Or, if you prefer that Mail::DWIM uses the "mail" Unix command line
+    utility, use 'mail' as a transport:
+
+        mail(
+          to          => 'foo@bar.com',
+          subject     => 'test message',
+          text        => 'test message text',
+          transport   => 'mail',
+          program     => '/usr/bin/mail',
+        );
+
     On a given system, these settings need to be specified only once and put
     into a configuration file. All "Mail::DWIM" instances running on this
     system will pick them up as default settings.
