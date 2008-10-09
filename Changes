@@ -1,6 +1,10 @@
 ######################################################################
 Revision history for Perl extension Mail::DWIM
 
+0.04  2008/10/09
+    (ms) Applied patch by Wolfgang Kinkeldei to guess the {date} 
+         header (http://rt.cpan.org/Ticket/Display.html?id=39911).
+
 0.03  2008/09/17
     (ms) Added 'mail' transport using the 'mail' command line utility.
     (ms) Fixed test problem reported by Volker Schering with undefined

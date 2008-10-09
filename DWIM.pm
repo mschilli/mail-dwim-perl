@@ -16,6 +16,7 @@ use Config;
 use Mail::Mailer;
 use Sys::Hostname;
 use File::Basename;
+use POSIX qw(strftime);
 use File::Spec;
 
 my $error;
@@ -51,6 +52,11 @@ sub new {
         my $user   = scalar getpwuid($<);
         my $domain = domain();
         $self->{from} = "$user\@$domain";
+    }
+
+      # Guess the 'date'
+    if (!exists $self->{date}) {
+        $self->{date} = strftime("%a, %e %b %Y %H:%M:%S %Z", localtime(time));
     }
 
     for my $cfg (qw(global_cfg_file user_cfg_file)) {
