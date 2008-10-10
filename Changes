@@ -1,6 +1,9 @@
 ######################################################################
 Revision history for Perl extension Mail::DWIM
 
+0.05  2008/10/10
+    (ms) Additional fix by Wolfgang Kinkeldei for the date header.
+
 0.04  2008/10/09
     (ms) Applied patch by Wolfgang Kinkeldei to guess the {date} 
          header (http://rt.cpan.org/Ticket/Display.html?id=39911).

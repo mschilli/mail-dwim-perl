@@ -6,7 +6,7 @@ use strict;
 use warnings;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mail);
-our $VERSION = "0.04";
+our $VERSION = "0.05";
 our @HTML_MODULES = qw(HTML::FormatText HTML::TreeBuilder MIME::Lite);
 our @ATTACH_MODULES = qw(File::MMagic MIME::Lite);
 
@@ -126,7 +126,7 @@ sub send {
 
     my $mailer = Mail::Mailer->new(@options);
     my %headers;
-    for (qw(from to cc bcc subject)) {
+    for (qw(from to cc bcc subject date)) {
         $headers{ucfirst($_)} = $self->{$_} if exists $self->{$_};
     }
 
