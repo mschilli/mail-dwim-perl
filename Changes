@@ -1,6 +1,10 @@
 ######################################################################
 Revision history for Perl extension Mail::DWIM
 
+0.06  2010/02/03
+    (ms) Splitting 'to' field on comma separators because for SMTP hosts,
+         as SMTP protocol doesn't support comma-separated recipient lists.
+
 0.05  2008/10/10
     (ms) Additional fix by Wolfgang Kinkeldei for the date header.
 
