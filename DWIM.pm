@@ -118,6 +118,8 @@ sub send {
     } elsif($self->{transport} eq "smtp") {
         LOGDIE "No smtp_server set" unless defined $self->{smtp_server};
         @options = ("smtp", Server => $self->{smtp_server});
+        push @options, (Port => $self->{smtp_port}) 
+          if exists $self->{smtp_port};
         $self->{to} = [split /\s*,\s*/, $self->{to}];
     } elsif($self->{transport} eq "mail") {
         return $self->cmd_line_mail();
@@ -498,6 +500,7 @@ deliver the mail. But you can also specify an SMTP server:
       text        => 'test message text',
       transport   => 'smtp',
       smtp_server => 'smtp.foobar.com',
+      smtp_port   => 25, # defaults to 25
     );
 
 Or, if you prefer that Mail::DWIM uses the C<mail> Unix command line

@@ -1,6 +1,9 @@
 ######################################################################
 Revision history for Perl extension Mail::DWIM
 
+0.07  (not yet released)
+    (ms) Added smtp_port parameter (defaults to 25).
+
 0.06  2010/02/03
     (ms) Splitting 'to' field on comma separators because for SMTP hosts,
          as SMTP protocol doesn't support comma-separated recipient lists.
