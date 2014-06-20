@@ -6,7 +6,7 @@ use strict;
 use warnings;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mail);
-our $VERSION = "0.06";
+our $VERSION = "0.07";
 our @HTML_MODULES = qw(HTML::FormatText HTML::TreeBuilder MIME::Lite);
 our @ATTACH_MODULES = qw(File::MMagic MIME::Lite);
 
@@ -116,6 +116,9 @@ sub send {
     } elsif($self->{transport} eq "sendmail") {
         @options = ();
     } elsif($self->{transport} eq "smtp") {
+          # Mail::SMTP likes it that way
+        $ENV{ MAILADDRESS } = $self->{ from };
+
         LOGDIE "No smtp_server set" unless defined $self->{smtp_server};
         @options = ("smtp", Server => $self->{smtp_server});
         push @options, (Port => $self->{smtp_port}) 
@@ -616,4 +619,11 @@ modify it under the same terms as Perl itself.
 
 =head1 AUTHOR
 
-2007, Mike Schilli <cpan@perlmeister.com>
+    2007, Mike Schilli <cpan@perlmeister.com>
+    
+=head1 LICENSE
+
+Copyright 2007-2014 by Mike Schilli, all rights reserved.
+This program is free software, you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
