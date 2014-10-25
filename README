@@ -1,5 +1,5 @@
 ######################################################################
-    Mail::DWIM 0.07
+    Mail::DWIM 0.08
 ######################################################################
 
 NAME
@@ -61,6 +61,12 @@ DESCRIPTION
           smtp_server => 'smtp.foobar.com',
           smtp_port   => 25, # defaults to 25
         );
+
+    If your SMTP server has SASL support, you can also specify a user name
+    and a password:
+
+          user     => 'joeschmoe',
+          password => 'top5ecret',
 
     Or, if you prefer that Mail::DWIM uses the "mail" Unix command line
     utility, use 'mail' as a transport:
