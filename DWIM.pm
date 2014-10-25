@@ -277,6 +277,15 @@ sub html_msg {
         $headers{$_} = $msg->attr($_);
     }
 
+      # evil hack to compensate for MIME::Lite's shortcomings
+    if( $headers{ "Content-Type" } !~ /boundary/ ) {
+        $headers{ "Content-Type" } = 
+            $headers{ "Content-Type" } . 
+            qq{; boundary="} .
+            $msg->{ SubAttrs }->{ "content-type" }->{ boundary } .
+            qq{"};
+    }
+
     return \%headers, $msg->body_as_string;
 }
 
