@@ -6,7 +6,7 @@ use strict;
 use warnings;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mail);
-our $VERSION = "0.07";
+our $VERSION = "0.08";
 our @HTML_MODULES = qw(HTML::FormatText HTML::TreeBuilder MIME::Lite);
 our @ATTACH_MODULES = qw(File::MMagic MIME::Lite);
 
@@ -124,6 +124,12 @@ sub send {
         push @options, (Port => $self->{smtp_port}) 
           if exists $self->{smtp_port};
         $self->{to} = [split /\s*,\s*/, $self->{to}];
+
+          # some smtp servers want SASL auth
+        if( defined $self->{user} ) {
+            require Authen::SASL;
+            push @options, (Auth => [ $self->{user}, $self->{password} ]);
+        }
     } elsif($self->{transport} eq "mail") {
         return $self->cmd_line_mail();
     } else {
@@ -505,6 +511,12 @@ deliver the mail. But you can also specify an SMTP server:
       smtp_server => 'smtp.foobar.com',
       smtp_port   => 25, # defaults to 25
     );
+
+If your SMTP server has SASL support, you can also specify a user name and
+a password:
+
+      user     => 'joeschmoe',
+      password => 'top5ecret',
 
 Or, if you prefer that Mail::DWIM uses the C<mail> Unix command line
 utility, use 'mail' as a transport:
