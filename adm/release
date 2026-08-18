@@ -1,7 +1,37 @@
-#!/usr/bin/perl
-use warnings;
-use strict;
+#!/usr/bin/env perl
 
-    # Available at http://perlmeister.com/scripts
-use ModDevUtils;
-ModDevUtils::release() or exit 0;
+use strict;
+use warnings;
+
+use Config;
+use ExtUtils::MakeMaker;
+use Pod::Text;
+
+my $module  = "DWIM.pm";
+my $readme  = "README";
+my $version = MM->parse_version($module);
+my $make    = $Config{make} || "make";
+my $archive = "Mail-DWIM-$version.tar.gz";
+
+die "Run $0 from the distribution root\n" unless -f $module;
+die "Cannot determine the version from $module\n"
+    unless defined $version && length $version && $version ne "undef";
+
+Pod::Text->new()->parse_from_file($module, $readme);
+
+unlink $archive or die "Cannot remove old $archive: $!\n" if -e $archive;
+
+run($^X, "Makefile.PL");
+run($make, "manifest");
+run($make, "test");
+run($make, "disttest");
+run($make, "dist");
+
+print "Release archive created: $archive\n";
+
+sub run {
+    my(@command) = @_;
+
+    system @command;
+    die "@command failed with exit status " . ($? >> 8) . "\n" if $?;
+}

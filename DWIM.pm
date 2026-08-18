@@ -6,7 +6,7 @@ use strict;
 use warnings;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mail);
-our $VERSION = "0.09";
+our $VERSION = "0.10";
 our @HTML_MODULES = qw(HTML::FormatText HTML::TreeBuilder MIME::Lite);
 our @ATTACH_MODULES = qw(MIME::Lite MIME::Types);
 
@@ -640,7 +640,7 @@ C<mail> command. Noboby has to read its documentation to use it:
 
 =head1 LEGALESE
 
-Copyright 2007 by Mike Schilli, all rights reserved.
+Copyright 2007-2026 by Mike Schilli, all rights reserved.
 This program is free software, you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
@@ -650,6 +650,6 @@ modify it under the same terms as Perl itself.
     
 =head1 LICENSE
 
-Copyright 2007-2014 by Mike Schilli, all rights reserved.
+Copyright 2007-2026 by Mike Schilli, all rights reserved.
 This program is free software, you can redistribute it and/or
 modify it under the same terms as Perl itself.
