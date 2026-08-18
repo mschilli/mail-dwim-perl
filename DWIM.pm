@@ -8,7 +8,7 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(mail);
 our $VERSION = "0.09";
 our @HTML_MODULES = qw(HTML::FormatText HTML::TreeBuilder MIME::Lite);
-our @ATTACH_MODULES = qw(File::MMagic MIME::Lite);
+our @ATTACH_MODULES = qw(MIME::Lite MIME::Types);
 
 use YAML qw(LoadFile);
 use Log::Log4perl qw(:easy);
@@ -310,10 +310,11 @@ sub attach_msg {
                  Data     => $text,
                 );
 
+    my $mime_types = MIME::Types->new();
+
     for my $file (@files) {
-        my $mm = File::MMagic->new();
-        my $type = $mm->checktype_filename($file);
-        LOGDIE "Cannot determine mime type of $file" unless defined $type;
+        my $type = $mime_types->mimeTypeOf($file);
+        $type = "application/octet-stream" unless defined $type;
 
         $msg->attach(Type        => $type,
                      Path        => $file,
@@ -652,4 +653,3 @@ modify it under the same terms as Perl itself.
 Copyright 2007-2014 by Mike Schilli, all rights reserved.
 This program is free software, you can redistribute it and/or
 modify it under the same terms as Perl itself.
-

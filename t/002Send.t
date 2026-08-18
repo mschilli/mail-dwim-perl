@@ -13,7 +13,7 @@ use Log::Log4perl qw(:easy);
 
 #Log::Log4perl->easy_init($DEBUG);
 
-plan tests => 10;
+plan tests => 12;
 
   # no raise_error
 my $rc = mail(
@@ -65,6 +65,36 @@ SKIP: {
     like($data, qr/^Subject: subject test 1/m, "html mail");
     like($data, qr/^Content-Type: multipart\/alternative/m, "html mail");
     like($data, qr/multi-part/m, "html mail");
+};
+
+Mail::DWIM::blurt("", $file);
+my($pfh, $pngfile) = tempfile(SUFFIX => ".png", UNLINK => 1);
+binmode $pfh;
+print $pfh "\x89PNG\r\n\x1a\n";
+close $pfh;
+
+SKIP: {
+
+    if(! Mail::DWIM::attach_requirements()) {
+        skip "@Mail::DWIM::ATTACH_MODULES not installed", 2;
+    }
+
+    my @warnings;
+    {
+        local $SIG{__WARN__} = sub { push @warnings, @_ };
+        mail(
+          from    => 'foo@foo.com',
+          to      => 'bar@bar.com',
+          subject => 'binary attachment',
+          text    => 'here is a png',
+          attach  => [ $pngfile ],
+        );
+    }
+
+    $data = Mail::DWIM::slurp($file);
+
+    like($data, qr/^Content-Type: image\/png/m, "binary attachment type");
+    is(join("", @warnings), "", "binary attachment emits no warning");
 };
 
 Mail::DWIM::blurt("", $file);
