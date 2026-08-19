@@ -110,6 +110,11 @@ sub send {
           "text=" . snip($self->{text}, 20) .
           "";
 
+    if($self->{dryrun}) {
+        print "$msg\n";
+        return 1;
+    }
+
     my @options = ();
 
     if(0) {
@@ -314,7 +319,8 @@ sub attach_msg {
 
     for my $file (@files) {
         my $type = $mime_types->mimeTypeOf($file);
-        $type = "application/octet-stream" unless defined $type;
+          # MIME::Lite expects a string, not a MIME::Type object.
+        $type = defined $type ? $type->type : "application/octet-stream";
 
         $msg->attach(Type        => $type,
                      Path        => $file,
@@ -578,6 +584,18 @@ a false value:
     }
 
 The detailed error message is available by calling Mail::DWIM::error().
+
+=head2 Dry Run
+
+Set the C<dryrun> option to a true value to print a summary of the message
+without opening a mail transport or sending anything:
+
+    mail(
+      dryrun  => 1,
+      to      => 'foo@bar.com',
+      subject => 'test message',
+      text    => 'test message text',
+    );
 
 =head2 Attaching files
 

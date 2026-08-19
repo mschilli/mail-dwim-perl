@@ -1,5 +1,6 @@
 .licensizer.yml
 Changes
+data/test.txt.gz
 DWIM.pm
 Makefile.PL
 MANIFEST			This list of files
